@@ -1,4 +1,6 @@
-﻿namespace Servidor.Model
+﻿using Newtonsoft.Json;
+
+namespace Servidor.Model
 {
     public class Client
     {

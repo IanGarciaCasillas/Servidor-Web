@@ -4,7 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
+using MySqlX.XDevAPI.Common;
+using Newtonsoft.Json.Linq;
 using Servidor.Model;
 
 namespace Servidor.Controllers
@@ -118,6 +121,36 @@ namespace Servidor.Controllers
         private bool ClientExists(int id)
         {
             return (_context.Client?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        ////FUNCIONS PERSONALITZADES
+
+
+        [HttpGet("login")]
+        public async Task<IActionResult> LoginClient(string correuClient, string passwordClient)
+        {
+            var nada = 1;
+            Client clientSelect = new Client();
+
+            var listClients = await _context.Client.ToListAsync<Client>();
+            int idx = 0;
+            bool clientTrobat = false;
+            bool credencialError = false;
+            while(!clientTrobat && !credencialError && idx<listClients.Count)
+            {
+                clientSelect = listClients[idx];
+                idx++;
+                if (clientSelect.Correu == correuClient && clientSelect.Contrasenya != passwordClient)
+                    credencialError = true;
+                if (clientSelect.Correu == correuClient && clientSelect.Contrasenya == passwordClient)
+                    clientTrobat = true;
+            }
+            if (clientTrobat)
+                return Ok(new { status = "Registrat", client = clientSelect });
+            if(credencialError)
+                return Ok(new { status = "InCorrect" });
+            else
+                return Ok(new { status = "SenseRegistre" });
         }
     }
 }
