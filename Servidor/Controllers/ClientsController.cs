@@ -4,26 +4,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
-using MySqlX.XDevAPI.Common;
-using Newtonsoft.Json.Linq;
 using Servidor.Model;
 
 namespace Servidor.Controllers
 {
-    [Route("/client")]
+    [Route("client")]
     [ApiController]
-    public class ClientController : ControllerBase
+    public class ClientsController : ControllerBase
     {
         private readonly DBContext _context;
 
-        public ClientController(DBContext context)
+        public ClientsController(DBContext context)
         {
             _context = context;
         }
 
-        // GET: api/Client
+        // GET: api/Clients
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Client>>> GetClient()
         {
@@ -34,7 +31,7 @@ namespace Servidor.Controllers
             return await _context.Client.ToListAsync();
         }
 
-        // GET: api/Client/5
+        // GET: api/Clients/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
@@ -52,12 +49,12 @@ namespace Servidor.Controllers
             return client;
         }
 
-        // PUT: api/Client/5
+        // PUT: api/Clients/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutClient(int id, Client client)
         {
-            if (id != client.Id)
+            if (id != client.IdClient)
             {
                 return BadRequest();
             }
@@ -83,7 +80,7 @@ namespace Servidor.Controllers
             return NoContent();
         }
 
-        // POST: api/Client
+        // POST: api/Clients
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Client>> PostClient(Client client)
@@ -95,10 +92,10 @@ namespace Servidor.Controllers
             _context.Client.Add(client);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClient", new { id = client.Id }, client);
+            return CreatedAtAction("GetClient", new { id = client.IdClient }, client);
         }
 
-        // DELETE: api/Client/5
+        // DELETE: api/Clients/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
@@ -120,12 +117,14 @@ namespace Servidor.Controllers
 
         private bool ClientExists(int id)
         {
-            return (_context.Client?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Client?.Any(e => e.IdClient == id)).GetValueOrDefault();
         }
 
-        ////FUNCIONS PERSONALITZADES
 
 
+        //FUNCIONS PERSONALITZADES
+
+        //FUNCION FUNCIONA AMB EL TESTING
         [HttpGet("login")]
         public async Task<IActionResult> LoginClient(string correuClient, string passwordClient)
         {
@@ -136,21 +135,22 @@ namespace Servidor.Controllers
             int idx = 0;
             bool clientTrobat = false;
             bool credencialError = false;
-            while(!clientTrobat && !credencialError && idx<listClients.Count)
+            while (!clientTrobat && !credencialError && idx < listClients.Count)
             {
                 clientSelect = listClients[idx];
                 idx++;
-                if (clientSelect.Correu == correuClient && clientSelect.Contrasenya != passwordClient)
+                if (clientSelect.CorreuClient == correuClient && clientSelect.ContrasenyaClient!= passwordClient)
                     credencialError = true;
-                if (clientSelect.Correu == correuClient && clientSelect.Contrasenya == passwordClient)
+                if (clientSelect.CorreuClient == correuClient && clientSelect.ContrasenyaClient == passwordClient)
                     clientTrobat = true;
             }
             if (clientTrobat)
                 return Ok(new { status = "Registrat", client = clientSelect });
-            if(credencialError)
+            if (credencialError)
                 return Ok(new { status = "InCorrect" });
             else
                 return Ok(new { status = "SenseRegistre" });
         }
+
     }
 }

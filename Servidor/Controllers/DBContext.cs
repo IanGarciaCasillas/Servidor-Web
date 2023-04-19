@@ -9,7 +9,7 @@ namespace Servidor.Controllers
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL("server=localhost;database=testing;user=root");
+            optionsBuilder.UseMySQL("server=localhost;database=db_projecte;user=root");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
