@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Servidor.Model;
+using Servidor.Models;
 
 namespace Servidor.Controllers
 {
@@ -13,33 +13,33 @@ namespace Servidor.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
-        private readonly DBContext _context;
+        private readonly DbProjecteContext _context;
 
-        public ClientsController(DBContext context)
+        public ClientsController(DbProjecteContext context)
         {
             _context = context;
         }
 
         // GET: api/Clients
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClient()
+        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
         {
-          if (_context.Client == null)
+          if (_context.Clients == null)
           {
               return NotFound();
           }
-            return await _context.Client.ToListAsync();
+            return await _context.Clients.ToListAsync();
         }
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
-          if (_context.Client == null)
+          if (_context.Clients == null)
           {
               return NotFound();
           }
-            var client = await _context.Client.FindAsync(id);
+            var client = await _context.Clients.FindAsync(id);
 
             if (client == null)
             {
@@ -85,31 +85,71 @@ namespace Servidor.Controllers
         [HttpPost]
         public async Task<ActionResult<Client>> PostClient(Client client)
         {
-          if (_context.Client == null)
-          {
-              return Problem("Entity set 'DBContext.Client'  is null.");
-          }
-            _context.Client.Add(client);
-            await _context.SaveChangesAsync();
+            if (_context.Clients == null)
+            {
+                return Problem("Client null");
+            }
+            try
+            {
+                bool correuClon = BuscarClientCorreu(client.CorreuClient);
+                if(!correuClon)
+                {
+                    _context.Clients.Add(client);
+                    await _context.SaveChangesAsync();
+                    return Ok(new { status = 200, newClient = new { client.IdClient, client.Dni, client.NomClient, client.Cognom1Client,
+                        client.Cognom2Client, client.CorreuClient, client.ContrasenyaClient,
+                        client.TelefonClient, client.DireccioClient, client.CodicPostal, client.Token } });
+                }
+                else
+                {
+                    return Ok(new { status = 201, problema = "Correu existent" });
+                }
+
+            }
+            catch(DbUpdateException ex)
+            {
+                return Problem("No es pot inserir el client");
+            }
+            
 
             return CreatedAtAction("GetClient", new { id = client.IdClient }, client);
+        }
+
+        private bool BuscarClientCorreu(string correuClient)
+        {
+            bool result = false;
+
+            var llistaClients = _context.Clients.ToListAsync();
+            bool trobat = false;
+            int idx = 0;
+            while(!trobat && idx < llistaClients.Result.Count)
+            {
+                var clientSelect = llistaClients.Result[idx];
+                if (clientSelect.CorreuClient == correuClient)
+                    trobat = true;
+                idx++;
+            }
+            if (trobat)
+                result = true;
+
+            return result;
         }
 
         // DELETE: api/Clients/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(int id)
         {
-            if (_context.Client == null)
+            if (_context.Clients == null)
             {
                 return NotFound();
             }
-            var client = await _context.Client.FindAsync(id);
+            var client = await _context.Clients.FindAsync(id);
             if (client == null)
             {
                 return NotFound();
             }
 
-            _context.Client.Remove(client);
+            _context.Clients.Remove(client);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -117,10 +157,8 @@ namespace Servidor.Controllers
 
         private bool ClientExists(int id)
         {
-            return (_context.Client?.Any(e => e.IdClient == id)).GetValueOrDefault();
+            return (_context.Clients?.Any(e => e.IdClient == id)).GetValueOrDefault();
         }
-
-
 
         //FUNCIONS PERSONALITZADES
 
@@ -131,7 +169,7 @@ namespace Servidor.Controllers
             var nada = 1;
             Client clientSelect = new Client();
 
-            var listClients = await _context.Client.ToListAsync<Client>();
+            var listClients = await _context.Clients.ToListAsync<Client>();
             int idx = 0;
             bool clientTrobat = false;
             bool credencialError = false;
@@ -139,7 +177,7 @@ namespace Servidor.Controllers
             {
                 clientSelect = listClients[idx];
                 idx++;
-                if (clientSelect.CorreuClient == correuClient && clientSelect.ContrasenyaClient!= passwordClient)
+                if (clientSelect.CorreuClient == correuClient && clientSelect.ContrasenyaClient != passwordClient)
                     credencialError = true;
                 if (clientSelect.CorreuClient == correuClient && clientSelect.ContrasenyaClient == passwordClient)
                     clientTrobat = true;
@@ -152,5 +190,15 @@ namespace Servidor.Controllers
                 return Ok(new { status = "SenseRegistre" });
         }
 
+        //FUNCIO NOTIFICACIO
+        [HttpPost("{titol}/{body}/{idClient}")]
+        public async Task<IActionResult> NotifcacioClient(string titol, string body, int idClient)
+        {
+            MobilNotific mobil = new MobilNotific();
+            Client clientSelect = await _context.Clients.FindAsync(idClient);
+            var result = mobil.SendNotific(titol, body, clientSelect.Token);
+            var espera = 1;
+            return Ok(result);
+        }
     }
 }

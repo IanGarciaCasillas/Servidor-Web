@@ -1,4 +1,8 @@
-﻿using Servidor.Controllers;
+﻿//using Servidor.Controllers;
+
+
+using Servidor.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Acces complet a la DB
-builder.Services.AddDbContext<DBContext>();
+builder.Services.AddDbContext<DbProjecteContext>();
 
 
 var app = builder.Build();
