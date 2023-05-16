@@ -470,15 +470,18 @@ public partial class DbProjecteContext : DbContext
             entity.Property(e => e.PreuArticle).HasColumnType("double(10,2)");
             entity.Property(e => e.Quantitat).HasColumnType("double(10,2)");
 
+
             entity.HasOne(d => d.IdArticleNavigation).WithMany(p => p.TicketDetalls)
                 .HasForeignKey(d => d.IdArticle)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TicketDetalls_Articles");
-
+            
+            
             entity.HasOne(d => d.Ticket).WithMany(p => p.TicketDetalls)
                 .HasForeignKey(d => new { d.IdTicket, d.NumDocument })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TicketDetalls_Ticket");
+            
         });
 
         OnModelCreatingPartial(modelBuilder);
