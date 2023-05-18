@@ -152,5 +152,24 @@ namespace Servidor.Controllers
             }
         }
 
+
+        [HttpGet("{id}/{numDocument}")]
+        public async Task<ActionResult<Ticket>> TicketGet(int id, int numDocument)
+        {
+            if (_context.Tickets == null)
+            {
+                return NotFound();
+            }
+            var ticket = await _context.Tickets.FindAsync(id, numDocument);
+
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            return ticket;
+        }
+
+
     }
 }

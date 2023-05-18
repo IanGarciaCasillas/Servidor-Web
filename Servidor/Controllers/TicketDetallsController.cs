@@ -136,5 +136,28 @@ namespace Servidor.Controllers
             var algo = 1;
             return result;
         }
+
+
+        //FUNCIONS PERSONALITZADES
+
+
+        [HttpGet("{id}/{numDocument}")]
+        public async Task<ActionResult<List<TicketDetall>>> GetTicketsDetalls(int id, int numDocument)
+        {
+            if (_context.TicketDetalls == null)
+            {
+                return NotFound();
+            }
+            var ticketsDetalls = await _context.TicketDetalls.ToListAsync();
+            List<TicketDetall> detalls = new List<TicketDetall>();
+            foreach (var detall in ticketsDetalls)
+            {
+                if (detall.IdTicket == id && detall.NumDocument == numDocument)
+                    detalls.Add(detall);
+            }
+
+            return detalls;
+        }
+
     }
 }

@@ -27,7 +27,7 @@ public partial class Article
     [JsonPropertyName("IdProveidorHabitual")]
     public int? IdProveidorHabitual { get; set; }
     [JsonPropertyName("FotoArticle")]
-    public byte[] FotoArticle { get; set; } = null!;
+    public byte[]? FotoArticle { get; set; } = null!;
     [JsonPropertyName("IvaAplicar")]
     public double IvaAplicar { get; set; }
     [JsonPropertyName("NumVenda")]
