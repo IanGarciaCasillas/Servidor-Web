@@ -291,3 +291,5 @@ C:\Users\SMXIGarcia\Nextcloud\DAM 2.2\(M13) Projecte\Projecte Final\Projecte\Ser
 C:\Users\SMXIGarcia\Nextcloud\DAM 2.2\(M13) Projecte\Projecte Final\Projecte\Servidor\Servidor\Servidor\bin\Debug\net6.0\Google.Apis.Auth.PlatformServices.dll
 C:\Users\SMXIGarcia\Nextcloud\DAM 2.2\(M13) Projecte\Projecte Final\Projecte\Servidor\Servidor\Servidor\bin\Debug\net6.0\Google.Apis.Auth.dll
 C:\Users\SMXIGarcia\Nextcloud\DAM 2.2\(M13) Projecte\Projecte Final\Projecte\Servidor\Servidor\Servidor\bin\Debug\net6.0\Google.Apis.Core.dll
+C:\Users\SMXIGarcia\Nextcloud\DAM 2.2\(M13) Projecte\Projecte Final\Projecte\Servidor\Servidor\Servidor\bin\Debug\net6.0\BouncyCastle.Crypto.dll
+C:\Users\SMXIGarcia\Nextcloud\DAM 2.2\(M13) Projecte\Projecte Final\Projecte\Servidor\Servidor\Servidor\bin\Debug\net6.0\itextsharp.dll

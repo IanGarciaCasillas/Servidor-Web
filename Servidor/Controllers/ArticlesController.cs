@@ -64,6 +64,7 @@ namespace Servidor.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok(new { status = 200 });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -121,6 +122,7 @@ namespace Servidor.Controllers
         }
 
         //FUNCIONS PERSONALITZADES
+
         [HttpGet("BuscarArticle")]
         public async Task<ActionResult<IEnumerable<Article>>> BuscarArticle(string nomArticle)
         {
@@ -138,6 +140,23 @@ namespace Servidor.Controllers
                 return Ok(new { status = 200, llista = llistaFiltrada });
             else
                 return Ok(new { status = 201 });
+        }
+
+
+
+        [HttpPost("GetArticlesDetalls")]
+        public async Task<IActionResult> GetArticlesDetalls(List<int> llista)
+        {
+            List<Article> llistaArticles = new List<Article>();
+
+            var articles = await _context.Articles.ToListAsync<Article>();
+            var idArticles = llista;
+
+            var articlesList = articles.Where(article => idArticles.Contains(article.IdArticle)).ToList();
+
+
+
+            return Ok(new { listArticles = articlesList });
         }
 
     }

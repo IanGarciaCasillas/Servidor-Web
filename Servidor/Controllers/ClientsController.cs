@@ -13,6 +13,9 @@ namespace Servidor.Controllers
     [ApiController]
     public class ClientsController : ControllerBase
     {
+
+        private Dictionary<int, List<ArticleCistella>> cistella = new Dictionary<int, List<ArticleCistella>>();
+
         private readonly DbProjecteContext _context;
 
         public ClientsController(DbProjecteContext context)
@@ -24,10 +27,10 @@ namespace Servidor.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Client>>> GetClients()
         {
-          if (_context.Clients == null)
-          {
-              return NotFound();
-          }
+            if (_context.Clients == null)
+            {
+                return NotFound();
+            }
             return await _context.Clients.ToListAsync();
         }
 
@@ -35,10 +38,10 @@ namespace Servidor.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
-          if (_context.Clients == null)
-          {
-              return NotFound();
-          }
+            if (_context.Clients == null)
+            {
+                return NotFound();
+            }
             var client = await _context.Clients.FindAsync(id);
 
             if (client == null)
@@ -64,6 +67,8 @@ namespace Servidor.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+
+                return Ok(new { status = 200 });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -92,7 +97,7 @@ namespace Servidor.Controllers
             try
             {
                 bool correuClon = BuscarClientCorreu(client.CorreuClient);
-                if(!correuClon)
+                if (!correuClon)
                 {
                     _context.Clients.Add(client);
                     await _context.SaveChangesAsync();
@@ -106,11 +111,11 @@ namespace Servidor.Controllers
                 }
 
             }
-            catch(DbUpdateException ex)
+            catch (DbUpdateException ex)
             {
                 return Problem("No es pot inserir el client");
             }
-            
+
 
             return CreatedAtAction("GetClient", new { id = client.IdClient }, client);
         }
@@ -122,7 +127,7 @@ namespace Servidor.Controllers
             var llistaClients = _context.Clients.ToListAsync();
             bool trobat = false;
             int idx = 0;
-            while(!trobat && idx < llistaClients.Result.Count)
+            while (!trobat && idx < llistaClients.Result.Count)
             {
                 var clientSelect = llistaClients.Result[idx];
                 if (clientSelect.CorreuClient == correuClient)
@@ -162,11 +167,51 @@ namespace Servidor.Controllers
 
         //FUNCIONS PERSONALITZADES
 
-        //FUNCION FUNCIONA AMB EL TESTING
+        /*
+
+        //FUNCION GET CISTELLA CLIENT
+        [HttpPost("cistella/{idClient}")]
+        public async Task<IActionResult> GetCistellaClient(int idClient)
+        {
+            //Sense Cistella
+            if (!cistella.ContainsKey(idClient))
+            {
+                return Ok(new { status = 201, log = "No hi ha cistella" });
+            }
+            else
+            {
+                var llistaArticlesCistella = cistella[idClient];
+
+                return Ok(new { status = 200, dades = llistaArticlesCistella});
+            }
+
+        }
+
+
+        //FUNCION ADD CISTELLA CLIENT
+        [HttpPost("cistella/{idClient}/{idArticle}")]
+        public async Task<IActionResult> AddCistella(int idClient, int idArticle)
+        {
+            //Sense Cistella
+            if (!cistella.ContainsKey(idClient))
+                cistella.Add(idClient, new List<ArticleCistella>());
+
+
+            var llistaArticlesCistella = cistella[idClient];
+            var articleSelect = await _context.Articles.FindAsync(idArticle);
+                
+            ArticleCistella item = new ArticleCistella();
+            item.Article = articleSelect;
+            item.Quantitat = 1;
+            llistaArticlesCistella.Add(item);
+            return Ok(new {status = 200, log = "Article en cistella"});
+        }
+        */
+
+        //FUNCION LOGIN CLIENT
         [HttpGet("login")]
         public async Task<IActionResult> LoginClient(string correuClient, string passwordClient)
         {
-            var nada = 1;
             Client clientSelect = new Client();
 
             var listClients = await _context.Clients.ToListAsync<Client>();
@@ -198,7 +243,8 @@ namespace Servidor.Controllers
             Client clientSelect = await _context.Clients.FindAsync(idClient);
             var result = mobil.SendNotific(titol, body, clientSelect.Token);
             var espera = 1;
-            return Ok(result);
+            return Ok(result.Status);
         }
+
     }
 }

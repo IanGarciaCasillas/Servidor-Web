@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -134,6 +135,65 @@ namespace Servidor.Controllers
             return (_context.Tickets?.Any(e => e.IdTicket == id)).GetValueOrDefault();
         }
 
+
+        //FUNCIONS PERSONALITZADES
+
+        [HttpPost("LliurarFactura")]
+        public async Task<IActionResult> LliurarFacturaClient(int numTicket, int numDocument, Client client)
+        {
+            var ticketClient = await TicketGet(numTicket, numDocument);
+
+            if (ticketClient.Value != null)
+            {
+                if (ticketClient.Value.IdClient != null)
+                    return Ok(new { status = 301 });
+                else
+                {                
+                    ticketClient.Value.IdClient = client.IdClient;
+
+                    _context.Entry(ticketClient.Value).State = EntityState.Modified;
+
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        //EnviarTicketCorreu(ticketClient.Value, client);
+                        return Ok(new { status = 200 });
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        return BadRequest();
+                    }
+                }
+            }
+            else
+            {
+                return Ok(new { status = 300 });
+            }
+
+
+        }
+
+        private void EnviarTicketCorreu(Ticket ticket, Client client)
+        {
+
+            DocumentFactura document = new DocumentFactura(_context);
+
+            var doc = document.ExportPdf(ticket, client);
+        }
+
+        [HttpGet("GetTicketClient")]
+        public async Task<IActionResult> GetTicketClient(int idClient)
+        {
+            var llistaTickets = await _context.Tickets.ToListAsync();
+
+            var llistaTicketsClient = llistaTickets.Where(ticket=> ticket.IdClient == idClient).ToList();
+
+            if (llistaTicketsClient.Count > 0)
+                return Ok(new { status = 200, tickets = llistaTicketsClient });
+            
+            else
+                return Ok(new { status = 201 });
+        }
 
 
         [HttpPost("{NumDocument}")]
